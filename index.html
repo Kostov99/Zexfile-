@@ -3,161 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Zexfile</title>
-    <meta name="description" content="Zexfile - Simple file tools in one place">
-
     <link rel="stylesheet" href="style.css">
-
-    <!-- QR Code Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <!-- jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
-<header class="topbar">
+<header class="header">
     <div class="brand">
         <div class="logo">Z</div>
         <div>
             <h1>Zexfile</h1>
-            <span>Simple. Fast. Useful.</span>
+            <p>Simple file tools</p>
         </div>
     </div>
 
-    <button class="theme-btn" id="themeBtn" title="Change theme">
-        ☀
-    </button>
+    <button id="themeBtn" class="iconBtn">☀</button>
 </header>
 
 
-<main class="container">
+<main>
 
     <section class="hero">
-        <p class="small-title">ZEXFILE TOOLS</p>
-        <h2>Your files.<br><span>Your tools.</span></h2>
-        <p class="hero-text">
-            Create files, generate QR codes and convert your images into PDF —
-            all in one simple place.
-        </p>
+        <span>ZEXFILE</span>
+        <h2>Your files.<br><b>Your tools.</b></h2>
+        <p>Create files, generate QR codes and convert images into PDF.</p>
     </section>
 
 
-    <!-- TOOL NAVIGATION -->
-    <div class="tabs">
-
-        <button class="tab active" data-target="textTool">
-            <span>📄</span>
-            Text File
-        </button>
-
-        <button class="tab" data-target="qrTool">
-            <span>🔗</span>
-            QR Code
-        </button>
-
-        <button class="tab" data-target="pdfTool">
-            <span>🖼️</span>
-            Images to PDF
-        </button>
-
-    </div>
+    <nav class="tabs">
+        <button class="tab active" data-page="textPage">📄 Text</button>
+        <button class="tab" data-page="qrPage">🔗 QR Code</button>
+        <button class="tab" data-page="pdfPage">🖼️ Images</button>
+    </nav>
 
 
-    <!-- TEXT FILE TOOL -->
-    <section class="tool-section active" id="textTool">
+    <!-- TEXT PAGE -->
+    <section id="textPage" class="page active">
 
-        <div class="section-heading">
+        <div class="title">
             <div>
-                <p class="section-label">FILE CREATOR</p>
-                <h3>Create a Text / JSON File</h3>
+                <small>FILE CREATOR</small>
+                <h3>Create TXT / JSON</h3>
             </div>
-            <span class="tool-icon">📄</span>
+            <span>📄</span>
         </div>
 
-        <label class="input-label">File name</label>
+        <label>File name</label>
 
-        <div class="filename-box">
-            <input
-                type="text"
-                id="fileName"
-                placeholder="my-file"
-                value="zexfile"
-            >
-
+        <div class="fileNameRow">
+            <input id="fileName" type="text" value="zexfile">
+            
             <select id="fileType">
-                <option value="txt">.txt</option>
-                <option value="json">.json</option>
+                <option value="txt">TXT</option>
+                <option value="json">JSON</option>
             </select>
         </div>
 
 
-        <label class="input-label">Content</label>
+        <label>Content</label>
 
-        <textarea
-            id="fileContent"
-            placeholder="Write or paste your content here..."
-        ></textarea>
+        <textarea id="fileContent"
+            placeholder="Write something here..."></textarea>
 
 
-        <div class="file-info">
-            <span id="characterCount">0 characters</span>
+        <div class="stats">
+            <span id="charCount">0 characters</span>
             <span id="lineCount">0 lines</span>
         </div>
 
 
-        <button class="primary-btn" id="downloadFileBtn">
-            <span>⬇</span>
-            Download File
+        <button id="downloadBtn" class="mainBtn">
+            ⬇ Download File
         </button>
 
     </section>
 
 
 
-    <!-- QR TOOL -->
-    <section class="tool-section" id="qrTool">
+    <!-- QR PAGE -->
+    <section id="qrPage" class="page">
 
-        <div class="section-heading">
+        <div class="title">
             <div>
-                <p class="section-label">QR GENERATOR</p>
+                <small>QR GENERATOR</small>
                 <h3>URL to QR Code</h3>
             </div>
-            <span class="tool-icon">🔗</span>
+            <span>🔗</span>
         </div>
 
 
-        <label class="input-label">Enter URL</label>
+        <label>Enter URL</label>
 
-        <div class="url-input-box">
-
-            <span>🌐</span>
-
-            <input
-                type="url"
-                id="urlInput"
-                placeholder="https://example.com"
-            >
-
-        </div>
+        <input
+            id="urlInput"
+            type="text"
+            placeholder="https://example.com"
+        >
 
 
-        <button class="primary-btn" id="generateQRBtn">
-            Generate QR Code
+        <button id="qrBtn" class="mainBtn">
+            Generate QR
         </button>
 
 
-        <div class="qr-result" id="qrResult">
+        <div id="qrBox" class="qrBox">
 
-            <div id="qrcode"></div>
+            <div id="qrCanvas"></div>
 
-            <p id="qrStatus">
-                Your QR code will appear here.
+            <p id="qrMessage">
+                QR code will appear here.
             </p>
 
-            <button class="secondary-btn hidden" id="downloadQRBtn">
+            <button
+                id="qrDownloadBtn"
+                class="secondBtn hidden">
                 ⬇ Download QR
             </button>
 
@@ -167,110 +127,57 @@
 
 
 
-    <!-- IMAGE TO PDF -->
-    <section class="tool-section" id="pdfTool">
+    <!-- IMAGE PAGE -->
+    <section id="pdfPage" class="page">
 
-        <div class="section-heading">
+        <div class="title">
             <div>
-                <p class="section-label">PDF CREATOR</p>
+                <small>IMAGE TOOL</small>
                 <h3>Images to PDF</h3>
             </div>
-            <span class="tool-icon">🖼️</span>
+            <span>🖼️</span>
         </div>
 
 
-        <label class="upload-area" for="imageInput">
-
-            <div class="upload-icon">＋</div>
-
-            <strong>Add Images</strong>
-
-            <span>
-                Select multiple JPG, PNG or WEBP images
-            </span>
-
+        <label for="imageInput" class="upload">
+            <strong>＋ Add Images</strong>
+            <span>JPG, PNG, WEBP</span>
         </label>
 
         <input
-            type="file"
             id="imageInput"
+            type="file"
             accept="image/*"
             multiple
             hidden
         >
 
 
-        <div class="image-toolbar hidden" id="imageToolbar">
+        <div id="imageArea" class="hidden">
 
-            <span id="imageCount">0 images</span>
+            <div class="imageTop">
+                <span id="imageCount">0 images</span>
 
-            <button id="clearImagesBtn">
-                Clear All
-            </button>
-
-        </div>
-
-
-        <div class="image-grid" id="imageGrid"></div>
-
-
-        <div class="pdf-settings hidden" id="pdfSettings">
-
-            <div class="setting">
-
-                <label>PDF Name</label>
-
-                <input
-                    type="text"
-                    id="pdfName"
-                    value="zexfile-document"
-                >
-
-            </div>
-
-
-            <div class="setting">
-
-                <label>Page Size</label>
-
-                <select id="pageSize">
-
-                    <option value="a4">A4</option>
-                    <option value="letter">Letter</option>
-                    <option value="a5">A5</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="primary-btn hidden"
-            id="createPDFBtn"
-        >
-            <span>📄</span>
-            Create PDF
-        </button>
-
-
-        <div
-            class="pdf-preview hidden"
-            id="pdfPreview"
-        >
-
-            <div class="preview-header">
-
-                <h4>PDF Preview</h4>
-
-                <button id="closePreviewBtn">
-                    ✕
+                <button id="clearBtn">
+                    Clear All
                 </button>
-
             </div>
 
-            <div id="previewPages"></div>
+
+            <div id="imageGrid"></div>
+
+
+            <input
+                id="pdfName"
+                type="text"
+                value="zexfile-document"
+                placeholder="PDF name"
+            >
+
+
+            <button id="pdfBtn" class="mainBtn">
+                📄 Create PDF
+            </button>
 
         </div>
 
@@ -280,24 +187,17 @@
 
 
 <footer>
-
-    <div class="footer-logo">
-        <span class="logo small">Z</span>
+    <div>
+        <div class="footerLogo">Z</div>
         <strong>Zexfile</strong>
     </div>
 
-    <p>
-        Simple file tools, made for everyone.
-    </p>
-
-    <p class="copyright">
-        © 2026 Zexfile
-    </p>
-
+    <p>Simple file tools, made for everyone.</p>
+    <small>© 2026 Zexfile</small>
 </footer>
 
 
-<div class="toast" id="toast"></div>
+<div id="toast"></div>
 
 
 <script src="script.js"></script>
