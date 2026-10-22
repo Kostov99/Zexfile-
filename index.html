@@ -63,6 +63,11 @@
             Images to PDF
         </button>
 
+        <button class="tab" data-target="resizeTool">
+    <span>📐</span>
+    Image Resizer
+        </button>
+
     </div>
 
 
@@ -275,6 +280,243 @@
         </div>
 
     </section>
+
+    <!-- IMAGE RESIZER TOOL -->
+
+<section class="tool-section" id="resizeTool">
+
+    <div class="section-heading">
+        <div>
+            <p class="section-label">IMAGE RESIZER</p>
+            <h3>Resize Photos & Images</h3>
+        </div>
+        <span class="tool-icon">📐</span>
+    </div>
+
+    <!-- Upload Image -->
+
+    <label class="upload-area" for="resizeImageInput">
+
+        <div class="upload-icon">＋</div>
+
+        <strong>Select Photo</strong>
+
+        <span>JPG, PNG or WebP images</span>
+
+    </label>
+
+    <input
+        type="file"
+        id="resizeImageInput"
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+    >
+
+    <!-- Image Information -->
+
+    <div id="resizeImageInfo" class="resize-info hidden">
+
+        <img id="resizeImagePreview" alt="Selected image preview">
+
+        <div>
+            <strong id="resizeOriginalName">Photo</strong>
+            <p id="resizeOriginalDimensions">Original dimensions</p>
+            <p id="resizeOriginalSize">Original file size</p>
+        </div>
+
+    </div>
+
+    <!-- Presets -->
+
+    <label class="input-label">Quick Presets</label>
+
+    <select id="resizePreset">
+
+        <option value="custom">Custom Size</option>
+        <option value="passport">Passport Photo - 35 × 45 mm</option>
+        <option value="stamp">Stamp Photo - 25 × 35 mm</option>
+        <option value="a4">A4 Paper - 210 × 297 mm</option>
+        <option value="a5">A5 Paper - 148 × 210 mm</option>
+        <option value="a3">A3 Paper - 297 × 420 mm</option>
+        <option value="letter">Letter Paper - 8.5 × 11 inches</option>
+        <option value="legal">Legal Paper - 8.5 × 14 inches</option>
+
+    </select>
+
+    <!-- Dimensions -->
+
+    <h4 class="resize-subheading">Image Dimensions</h4>
+
+    <div class="resize-grid">
+
+        <div class="setting">
+            <label for="resizeWidth">Width</label>
+            <input
+                type="number"
+                id="resizeWidth"
+                min="1"
+                max="12000"
+                value="800"
+            >
+        </div>
+
+        <div class="setting">
+            <label for="resizeHeight">Height</label>
+            <input
+                type="number"
+                id="resizeHeight"
+                min="1"
+                max="12000"
+                value="800"
+            >
+        </div>
+
+    </div>
+
+    <label class="checkbox-setting">
+        <input type="checkbox" id="resizeKeepRatio" checked>
+        Maintain original aspect ratio
+    </label>
+
+    <!-- Physical Dimensions -->
+
+    <h4 class="resize-subheading">Print Size</h4>
+
+    <div class="resize-grid">
+
+        <div class="setting">
+            <label for="resizePrintWidth">Width</label>
+            <input
+                type="number"
+                id="resizePrintWidth"
+                min="0.1"
+                step="0.1"
+                value="3.5"
+            >
+        </div>
+
+        <div class="setting">
+            <label for="resizePrintHeight">Height</label>
+            <input
+                type="number"
+                id="resizePrintHeight"
+                min="0.1"
+                step="0.1"
+                value="4.5"
+            >
+        </div>
+
+    </div>
+
+    <div class="resize-grid">
+
+        <div class="setting">
+            <label for="resizeUnit">Measurement Unit</label>
+
+            <select id="resizeUnit">
+                <option value="cm">Centimeters (cm)</option>
+                <option value="inch">Inches (in)</option>
+            </select>
+        </div>
+
+        <div class="setting">
+            <label for="resizeDPI">Resolution (DPI)</label>
+
+            <select id="resizeDPI">
+                <option value="72">72 DPI</option>
+                <option value="150">150 DPI</option>
+                <option value="200">200 DPI</option>
+                <option value="300" selected>300 DPI</option>
+                <option value="600">600 DPI</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="secondary-btn full-btn" id="applyPrintSize">
+        Apply Print Size
+    </button>
+
+    <!-- Output Format -->
+
+    <h4 class="resize-subheading">Output Settings</h4>
+
+    <div class="resize-grid">
+
+        <div class="setting">
+            <label for="resizeFormat">Image Format</label>
+
+            <select id="resizeFormat">
+                <option value="image/jpeg">JPG</option>
+                <option value="image/png">PNG</option>
+                <option value="image/webp">WebP</option>
+            </select>
+        </div>
+
+        <div class="setting">
+            <label for="resizeTargetKB">Target Size (KB)</label>
+
+            <input
+                type="number"
+                id="resizeTargetKB"
+                min="0"
+                max="50000"
+                placeholder="Optional"
+            >
+        </div>
+
+    </div>
+
+    <p class="resize-hint">
+        Target size is approximate. Actual file size depends on
+        image content, dimensions and format. PNG compression may
+        not achieve a specific target size.
+    </p>
+
+    <!-- Resize Button -->
+
+    <button class="primary-btn" id="resizeImageBtn">
+        Resize & Download Image
+    </button>
+
+    <!-- Results -->
+
+    <div id="resizeResult" class="resize-result hidden">
+
+        <h4>Resized Successfully</h4>
+
+        <div class="result-stats">
+
+            <div>
+                <span>Dimensions</span>
+                <strong id="resultDimensions">-</strong>
+            </div>
+
+            <div>
+                <span>File Size</span>
+                <strong id="resultFileSize">-</strong>
+            </div>
+
+            <div>
+                <span>Print Size</span>
+                <strong id="resultPrintSize">-</strong>
+            </div>
+
+        </div>
+
+        <img id="resizeResultPreview" alt="Resized image preview">
+
+        <a
+            id="downloadResizedImage"
+            class="primary-btn download-link"
+            download="zexfile-resized.jpg"
+        >
+            ⬇ Download Resized Image
+        </a>
+
+    </div>
+
+</section>
 
 </main>
 
