@@ -1036,6 +1036,624 @@ $("urlInput").addEventListener(
 );
 
 
+/* ==========================================
+   ZEXFILE IMAGE RESIZER
+========================================== */
+
+let resizeSourceFile = null;
+let resizeSourceImage = null;
+let resizeSourceURL = null;
+let resizeOutputURL = null;
+
+
+/* ==========================================
+   SELECT IMAGE
+========================================== */
+
+$("resizeImageInput").addEventListener("change", async function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        showToast("Please select an image.");
+        return;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+        showToast("Image must be smaller than 25 MB.");
+        this.value = "";
+        return;
+    }
+
+    try {
+
+        if (resizeSourceURL) {
+            URL.revokeObjectURL(resizeSourceURL);
+        }
+
+        resizeSourceFile = file;
+        resizeSourceURL = URL.createObjectURL(file);
+
+        resizeSourceImage = await loadImage(resizeSourceURL);
+
+        $("resizeImagePreview").src = resizeSourceURL;
+
+        $("resizeOriginalName").textContent = file.name;
+
+        $("resizeOriginalDimensions").textContent =
+            `${resizeSourceImage.naturalWidth} × ${resizeSourceImage.naturalHeight} px`;
+
+        $("resizeOriginalSize").textContent =
+            formatBytes(file.size);
+
+        $("resizeWidth").value =
+            resizeSourceImage.naturalWidth;
+
+        $("resizeHeight").value =
+            resizeSourceImage.naturalHeight;
+
+        $("resizePrintWidth").value =
+            (
+                resizeSourceImage.naturalWidth /
+                Number($("resizeDPI").value) *
+                2.54
+            ).toFixed(2);
+
+        $("resizePrintHeight").value =
+            (
+                resizeSourceImage.naturalHeight /
+                Number($("resizeDPI").value) *
+                2.54
+            ).toFixed(2);
+
+        $("resizeImageInfo").classList.remove("hidden");
+
+        $("resizeResult").classList.add("hidden");
+
+        showToast("Photo loaded successfully.");
+
+    } catch (error) {
+
+        showToast("Could not open this image.");
+
+    }
+
+});
+
+
+/* ==========================================
+   FORMAT FILE SIZE
+========================================== */
+
+function formatBytes(bytes) {
+
+    if (bytes < 1024) {
+        return bytes + " B";
+    }
+
+    if (bytes < 1024 * 1024) {
+        return (bytes / 1024).toFixed(2) + " KB";
+    }
+
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+
+}
+
+
+/* ==========================================
+   ASPECT RATIO
+========================================== */
+
+$("resizeWidth").addEventListener("input", function () {
+
+    if (
+        !$("resizeKeepRatio").checked ||
+        !resizeSourceImage
+    ) return;
+
+    const width = Number(this.value);
+
+    if (width > 0) {
+
+        $("resizeHeight").value = Math.max(
+            1,
+            Math.round(
+                width *
+                resizeSourceImage.naturalHeight /
+                resizeSourceImage.naturalWidth
+            )
+        );
+
+    }
+
+});
+
+
+$("resizeHeight").addEventListener("input", function () {
+
+    if (
+        !$("resizeKeepRatio").checked ||
+        !resizeSourceImage
+    ) return;
+
+    const height = Number(this.value);
+
+    if (height > 0) {
+
+        $("resizeWidth").value = Math.max(
+            1,
+            Math.round(
+                height *
+                resizeSourceImage.naturalWidth /
+                resizeSourceImage.naturalHeight
+            )
+        );
+
+    }
+
+});
+
+
+/* ==========================================
+   DPI AND PHYSICAL SIZE
+========================================== */
+
+$("resizeDPI").addEventListener("change", function () {
+
+    if (!resizeSourceImage) return;
+
+    const dpi = Number(this.value);
+
+    const unit = $("resizeUnit").value;
+
+    const conversion = unit === "cm" ? 2.54 : 1;
+
+    $("resizePrintWidth").value = (
+        resizeSourceImage.naturalWidth /
+        dpi *
+        conversion
+    ).toFixed(2);
+
+    $("resizePrintHeight").value = (
+        resizeSourceImage.naturalHeight /
+        dpi *
+        conversion
+    ).toFixed(2);
+
+});
+
+
+$("resizeUnit").addEventListener("change", function () {
+
+    if (!resizeSourceImage) return;
+
+    const width = Number($("resizePrintWidth").value);
+    const height = Number($("resizePrintHeight").value);
+
+    if (this.value === "inch") {
+
+        $("resizePrintWidth").value =
+            (width / 2.54).toFixed(2);
+
+        $("resizePrintHeight").value =
+            (height / 2.54).toFixed(2);
+
+    } else {
+
+        $("resizePrintWidth").value =
+            (width * 2.54).toFixed(2);
+
+        $("resizePrintHeight").value =
+            (height * 2.54).toFixed(2);
+
+    }
+
+});
+
+
+/* ==========================================
+   PRESET DIMENSIONS
+========================================== */
+
+$("resizePreset").addEventListener("change", function () {
+
+    const preset = this.value;
+
+    const dpi = Number($("resizeDPI").value);
+
+    const unit = $("resizeUnit").value;
+
+    let widthMM;
+    let heightMM;
+
+    switch (preset) {
+
+        case "passport":
+            widthMM = 35;
+            heightMM = 45;
+            break;
+
+        case "stamp":
+            widthMM = 25;
+            heightMM = 35;
+            break;
+
+        case "a4":
+            widthMM = 210;
+            heightMM = 297;
+            break;
+
+        case "a5":
+            widthMM = 148;
+            heightMM = 210;
+            break;
+
+        case "a3":
+            widthMM = 297;
+            heightMM = 420;
+            break;
+
+        case "letter":
+            widthMM = 215.9;
+            heightMM = 279.4;
+            break;
+
+        case "legal":
+            widthMM = 215.9;
+            heightMM = 355.6;
+            break;
+
+        default:
+            return;
+
+    }
+
+    const widthInches = widthMM / 25.4;
+    const heightInches = heightMM / 25.4;
+
+    $("resizeWidth").value =
+        Math.round(widthInches * dpi);
+
+    $("resizeHeight").value =
+        Math.round(heightInches * dpi);
+
+    $("resizeKeepRatio").checked = false;
+
+    const factor = unit === "cm" ? 10 : 25.4;
+
+    $("resizePrintWidth").value =
+        (widthMM / factor).toFixed(2);
+
+    $("resizePrintHeight").value =
+        (heightMM / factor).toFixed(2);
+
+    showToast("Preset applied.");
+
+});
+
+
+/* ==========================================
+   APPLY PRINT SIZE
+========================================== */
+
+$("applyPrintSize").addEventListener("click", function () {
+
+    const width = Number($("resizePrintWidth").value);
+    const height = Number($("resizePrintHeight").value);
+
+    const dpi = Number($("resizeDPI").value);
+
+    const unit = $("resizeUnit").value;
+
+    if (
+        !Number.isFinite(width) ||
+        !Number.isFinite(height) ||
+        width <= 0 ||
+        height <= 0
+    ) {
+
+        showToast("Enter valid print dimensions.");
+
+        return;
+
+    }
+
+    const multiplier =
+        unit === "cm" ? dpi / 2.54 : dpi;
+
+    const pixelWidth =
+        Math.round(width * multiplier);
+
+    const pixelHeight =
+        Math.round(height * multiplier);
+
+    if (
+        pixelWidth > 12000 ||
+        pixelHeight > 12000
+    ) {
+
+        showToast("Dimensions are too large.");
+
+        return;
+
+    }
+
+    $("resizeWidth").value = pixelWidth;
+
+    $("resizeHeight").value = pixelHeight;
+
+    $("resizeKeepRatio").checked = false;
+
+    showToast("Print dimensions applied.");
+
+});
+
+
+/* ==========================================
+   CANVAS TO BLOB
+========================================== */
+
+function canvasToBlob(canvas, format, quality) {
+
+    return new Promise((resolve, reject) => {
+
+        canvas.toBlob(blob => {
+
+            if (blob) {
+                resolve(blob);
+            } else {
+                reject(new Error("Image conversion failed."));
+            }
+
+        }, format, quality);
+
+    });
+
+}
+
+
+/* ==========================================
+   RESIZE AND COMPRESS
+========================================== */
+
+$("resizeImageBtn").addEventListener("click", async function () {
+
+    if (!resizeSourceImage || !resizeSourceFile) {
+
+        showToast("Please select a photo first.");
+
+        return;
+
+    }
+
+    const width = Number($("resizeWidth").value);
+
+    const height = Number($("resizeHeight").value);
+
+    const format = $("resizeFormat").value;
+
+    const targetKB = Number($("resizeTargetKB").value);
+
+    if (
+        !Number.isInteger(width) ||
+        !Number.isInteger(height) ||
+        width < 1 ||
+        height < 1 ||
+        width > 12000 ||
+        height > 12000
+    ) {
+
+        showToast("Enter valid dimensions up to 12000 px.");
+
+        return;
+
+    }
+
+    if (
+        $("resizeTargetKB").value.trim() !== "" &&
+        (!Number.isFinite(targetKB) || targetKB <= 0)
+    ) {
+
+        showToast("Enter a valid target file size.");
+
+        return;
+
+    }
+
+    if (width * height > 40000000) {
+
+        showToast("Image is too large to process safely.");
+
+        return;
+
+    }
+
+    const button = $("resizeImageBtn");
+
+    button.disabled = true;
+
+    button.textContent = "Processing Image...";
+
+    try {
+
+        const canvas = document.createElement("canvas");
+
+        canvas.width = width;
+
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+
+        if (format === "image/jpeg") {
+
+            ctx.fillStyle = "#ffffff";
+
+            ctx.fillRect(0, 0, width, height);
+
+        }
+
+        ctx.drawImage(
+            resizeSourceImage,
+            0,
+            0,
+            width,
+            height
+        );
+
+        let blob;
+
+        if (format === "image/png") {
+
+            blob = await canvasToBlob(
+                canvas,
+                format
+            );
+
+        } else {
+
+            const hasTarget =
+                $("resizeTargetKB").value.trim() !== "";
+
+            if (!hasTarget) {
+
+                blob = await canvasToBlob(
+                    canvas,
+                    format,
+                    0.92
+                );
+
+            } else {
+
+                const targetBytes = targetKB * 1024;
+
+                let low = 0.05;
+
+                let high = 1;
+
+                let bestBlob = null;
+
+                // Try to get as close as possible
+                // without exceeding the requested size.
+
+                for (let i = 0; i < 8; i++) {
+
+                    const quality = (low + high) / 2;
+
+                    const candidate = await canvasToBlob(
+                        canvas,
+                        format,
+                        quality
+                    );
+
+                    if (candidate.size <= targetBytes) {
+
+                        bestBlob = candidate;
+
+                        low = quality;
+
+                    } else {
+
+                        high = quality;
+
+                    }
+
+                }
+
+                const finalBlob = await canvasToBlob(
+                    canvas,
+                    format,
+                    low
+                );
+
+                if (finalBlob.size <= targetBytes) {
+
+                    bestBlob = finalBlob;
+
+                }
+
+                blob = bestBlob || finalBlob;
+
+            }
+
+        }
+
+        if (resizeOutputURL) {
+
+            URL.revokeObjectURL(resizeOutputURL);
+
+        }
+
+        resizeOutputURL = URL.createObjectURL(blob);
+
+        const extension = {
+            "image/jpeg": "jpg",
+            "image/png": "png",
+            "image/webp": "webp"
+        }[format];
+
+        const downloadLink = $("downloadResizedImage");
+
+        downloadLink.href = resizeOutputURL;
+
+        downloadLink.download =
+            `zexfile-resized.${extension}`;
+
+        $("resizeResultPreview").src = resizeOutputURL;
+
+        $("resultDimensions").textContent =
+            `${width} × ${height} px`;
+
+        $("resultFileSize").textContent =
+            formatBytes(blob.size);
+
+        const unit = $("resizeUnit").value;
+
+        $("resultPrintSize").textContent =
+            `${$("resizePrintWidth").value} × ` +
+            `${$("resizePrintHeight").value} ${unit}`;
+
+        $("resizeResult").classList.remove("hidden");
+
+        let message = "Image resized successfully.";
+
+        if (
+            $("resizeTargetKB").value.trim() !== "" &&
+            format !== "image/png" &&
+            blob.size > targetKB * 1024
+        ) {
+
+            message =
+                "Target size could not be reached. Try smaller dimensions.";
+
+        } else if (format === "image/png" && targetKB > 0) {
+
+            message =
+                "PNG saved. Its size may exceed your target.";
+
+        }
+
+        showToast(message);
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast("Could not resize this image.");
+
+    } finally {
+
+        button.disabled = false;
+
+        button.innerHTML =
+            "<span>📐</span> Resize & Download Image";
+
+    }
+
+});
+
+
 /* =========================
    INITIALIZE
 ========================= */
